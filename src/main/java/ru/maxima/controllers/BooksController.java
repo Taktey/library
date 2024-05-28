@@ -31,11 +31,12 @@ public class BooksController {
     }
 
     @GetMapping("/{id}")
-    public String bookById(@PathVariable("id") Long bookId, Model model) {
+    public String bookById(@PathVariable("id") Long bookId, Model model, @ModelAttribute("person") Person person) {
         Book book = bookDAO.findBookById(bookId);
         List<Person> people = personDAO.getAllPeople();
         model.addAttribute("bookById", book);
         model.addAttribute("allPeople", people);
+        model.addAttribute("person", person);
         return "books/view-with-book-by-id";
     }
 
@@ -69,10 +70,10 @@ public class BooksController {
         return "redirect:/books";
     }
 
-    @PostMapping("/{id}/{ownerId}")
-    public String giveBook(@PathVariable("id") Long bookId, @PathVariable Long ownerId) {
-        bookDAO.giveBookAway(bookId, ownerId);
-        return "redirect:/books/*{bookId}";
+    @PostMapping("/{id}/give")
+    public String giveBook(@PathVariable("id") Long bookId, @ModelAttribute("person") Person person) {
+        bookDAO.giveBookAway(bookId, person.getPersonId());
+        return "redirect:/books/" + bookId;
     }
 
     @PostMapping("/{id}/return")

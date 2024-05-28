@@ -31,23 +31,26 @@ public class BookDAO {
                 book.getBookName(), book.getAuthor(), book.getYear());
     }
 
-    public void updateBook(Book book, Long id){
+    public void updateBook(Book book, Long id) {
         jdbcTemplate.update("update books set book_name=?,book_author=?,book_year=? where book_id=?",
                 book.getBookName(), book.getAuthor(), book.getYear(), id);
     }
-    public void deleteBook(Long id){
-        jdbcTemplate.update("delete from books where book_id=?",id);
+
+    public void deleteBook(Long id) {
+        jdbcTemplate.update("delete from books where book_id=?", id);
     }
 
-    public List<Book> booksByOwnerId(Long ownerId){
+    public List<Book> booksByOwnerId(Long ownerId) {
         return jdbcTemplate
                 .query("Select * from books where owner=?", new Object[]{ownerId}, new BookMapper());
     }
-    public void takeBookBackToLibrary(Long bookId){
-        jdbcTemplate.update("update books set owner=null where book_id=?",bookId);
+
+    public void takeBookBackToLibrary(Long bookId) {
+        jdbcTemplate.update("update books set owner=null where book_id=?", bookId);
     }
-    public void giveBookAway(Long bookId, Long personId){
+
+    public void giveBookAway(Long bookId, Long personId) {
         jdbcTemplate.update("update books set owner=? where book_id=?",
-                personId,bookId);
+                personId, bookId);
     }
 }

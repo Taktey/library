@@ -10,6 +10,17 @@
 
 <p th:text="${personById.getPersonName()}+', '+${personById.getPersonBirthYear()}"/>
 
+<div th:each="book : ${books}" th:if="${#lists.size(books) != 0}">
+    <hr/>
+    <p>Books:</p>
+    <p th:text="${book.getBookName() + ', ' + book.getAuthor() + ', ' + book.getYear()}">
+        user_book</p>
+</div>
+<div th:if="${#lists.size(books) == 0}">This person holds no books</div>
+
+<br/>
+
+
 <br>
 <hr>
 <form th:method="GET" th:action="@{/people/{id}/edit(id=${personById.getPersonId()})}">
