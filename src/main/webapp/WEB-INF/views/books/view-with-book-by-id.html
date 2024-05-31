@@ -25,7 +25,7 @@
     </form>
 
     <form method='POST' th:object="${bookById}"
-          th:action="@{/{id}/{ownerId}(id=${bookById.getBookId()})(ownerId=)}">
+          th:action="@{/{id}/return}">
         <div th:each="person: ${allPeople}" th:if="${person.getPersonId() == bookById.getOwnerId}">
             <p>Book owner:</p>
             <a th:href="@{/people/{id}(id=${person.getPersonId()})}" th:text="${person.getPersonName()}"></a>
