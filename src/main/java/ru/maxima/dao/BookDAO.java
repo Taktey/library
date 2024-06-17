@@ -1,60 +1,72 @@
 package ru.maxima.dao;
 
+import jakarta.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Book;
 import ru.maxima.models.Person;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class BookDAO {
-    Configuration configuration = new Configuration()
-            .addAnnotatedClass(Person.class)
-            .addAnnotatedClass(Book.class);
-    private JdbcTemplate jdbcTemplate;
+    SessionFactory sessionFactory;
+    @Autowired
+    public BookDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
 
-    public BookDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private Session getSession() {
+        return Objects.requireNonNull(sessionFactory).getCurrentSession();
     }
 
 
+    @Transactional
     public List<Book> getAllBooks() {
-        return jdbcTemplate
-                .query("Select * from books", new BookMapper());
+        return getSession().createQuery("from Book", Book.class).list();
     }
 
+    @Transactional
     public Book findBookById(Long id) {
-        return jdbcTemplate
-                .queryForObject("select * from books where book_id=?", new Object[]{id}, new BookMapper());
+        return getSession().get(Book.class,id);
     }
 
+    @Transactional
     public void saveBook(Book book) {
-        jdbcTemplate.update("insert into books(book_name, book_author, book_year) values(?,?,?)",
-                book.getBookName(), book.getAuthor(), book.getYear());
+        getSession().persist(book);
     }
 
+    @Transactional
     public void updateBook(Book book, Long id) {
-        jdbcTemplate.update("update books set book_name=?,book_author=?,book_year=? where book_id=?",
-                book.getBookName(), book.getAuthor(), book.getYear(), id);
+        Book bookToUpdate = getSession().get(Book.class, id);
+        bookToUpdate.setBookName(book.getBookName());
+        bookToUpdate.setAuthor(book.getAuthor());
+        bookToUpdate.setYear(book.getYear());
     }
 
+    @Transactional
     public void deleteBook(Long id) {
-        jdbcTemplate.update("delete from books where book_id=?", id);
+        getSession().remove(getSession().get(Book.class,id));
+        //jdbcTemplate.update("delete from books where book_id=?", id);
     }
 
+    @Transactional
     public List<Book> booksByOwnerId(Long ownerId) {
-        return jdbcTemplate
-                .query("Select * from books where owner=?", new Object[]{ownerId}, new BookMapper());
+        return getSession().createQuery("from Book where ownerId=ownerId").list();
     }
 
+    @Transactional
     public void takeBookBackToLibrary(Long bookId) {
-        jdbcTemplate.update("update books set owner=null where book_id=?", bookId);
+        Book bookToTakeBack = getSession().get(Book.class,bookId);
+        bookToTakeBack.setOwnerId(null);
     }
-
+    @Transactional
     public void giveBookAway(Long bookId, Long personId) {
-        jdbcTemplate.update("update books set owner=? where book_id=?",
-                personId, bookId);
+        getSession().get(Book.class,bookId).setOwnerId(personId);
     }
 }

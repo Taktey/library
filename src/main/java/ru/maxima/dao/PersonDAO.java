@@ -1,69 +1,52 @@
 package ru.maxima.dao;
 
+import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Person;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PersonDAO {
-    Configuration configuration = new Configuration()
-            .addAnnotatedClass(Person.class);
-    SessionFactory sessionFactory = configuration.buildSessionFactory();
-    Session session = sessionFactory.getCurrentSession();
-    Transaction transaction;
+    SessionFactory sessionFactory;
 
-
-
-    private JdbcTemplate jdbcTemplate;
-
-    public PersonDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Autowired
+    public PersonDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    private Session getSession() {
+        return Objects.requireNonNull(sessionFactory).getCurrentSession();
+    }
+
+    @Transactional
     public List<Person> getAllPeople() {
-        try {
-            session.beginTransaction();
-            return session.createQuery("from Person", Person.class).list();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        finally {
-            session.close();
-        }
-        return null;
+        return getSession().createQuery("from Person", Person.class).list();
     }
 
+    @Transactional
     public Person findPersonById(Long id) {
-        try {
-            session.beginTransaction();
-            return session.get(Person.class, id);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        finally {
-            session.close();
-        }
-        return null;
+        return getSession().get(Person.class, id);
     }
 
+    @Transactional
     public void savePerson(Person person) {
-        jdbcTemplate.update("insert into person(person_name, person_birth_year) values(?,?)",
-                person.getPersonName(), person.getPersonBirthYear());
+        getSession().persist(person);
     }
 
-    public void updatePerson(Person person, Long id){
-        jdbcTemplate.update("update person set person_name=?,person_birth_year=? where person_id=?",
-                person.getPersonName(), person.getPersonBirthYear(), id);
+    @Transactional
+    public void updatePerson(Person person, Long id) {
+        Person personToUpdate = getSession().get(Person.class, id);
+        personToUpdate.setPersonName(person.getPersonName());
+        personToUpdate.setPersonBirthYear(person.getPersonBirthYear());
     }
 
-    public void deletePerson(Long id){
-        jdbcTemplate.update("delete from person where person_id=?",id);
+    @Transactional
+    public void deletePerson(Long id) {
+        getSession().remove(getSession().get(Person.class, id));
     }
 }

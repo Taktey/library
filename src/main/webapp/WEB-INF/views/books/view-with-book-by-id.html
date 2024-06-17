@@ -9,7 +9,7 @@
 <body>
 <p th:text="${bookById.getBookName}+', '+${bookById.getAuthor()}+', '+${bookById.getYear}"/>
 
-<div th:if="${bookById.getOwnerId() == 0}">
+<div th:if="${bookById.getOwnerId() == 0 || bookById.getOwnerId()== null}">
     <hr>
     <p>
         Book is now at library.
@@ -37,7 +37,7 @@
 </div>
 
 
-<div th:if="${bookById.getOwnerId() != 0}">
+<div th:if="${bookById.getOwnerId() != 0 || bookById.getOwnerId() != null}">
     <hr>
     <p>
     <form method='POST' th:object="${bookById}"
