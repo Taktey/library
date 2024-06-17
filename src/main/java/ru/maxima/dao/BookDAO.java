@@ -3,12 +3,9 @@ package ru.maxima.dao;
 import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Book;
-import ru.maxima.models.Person;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +13,7 @@ import java.util.Objects;
 @Component
 public class BookDAO {
     SessionFactory sessionFactory;
+
     @Autowired
     public BookDAO(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -33,7 +31,7 @@ public class BookDAO {
 
     @Transactional
     public Book findBookById(Long id) {
-        return getSession().get(Book.class,id);
+        return getSession().get(Book.class, id);
     }
 
     @Transactional
@@ -51,7 +49,7 @@ public class BookDAO {
 
     @Transactional
     public void deleteBook(Long id) {
-        getSession().remove(getSession().get(Book.class,id));
+        getSession().remove(getSession().get(Book.class, id));
         //jdbcTemplate.update("delete from books where book_id=?", id);
     }
 
@@ -62,11 +60,12 @@ public class BookDAO {
 
     @Transactional
     public void takeBookBackToLibrary(Long bookId) {
-        Book bookToTakeBack = getSession().get(Book.class,bookId);
+        Book bookToTakeBack = getSession().get(Book.class, bookId);
         bookToTakeBack.setOwnerId(null);
     }
+
     @Transactional
     public void giveBookAway(Long bookId, Long personId) {
-        getSession().get(Book.class,bookId).setOwnerId(personId);
+        getSession().get(Book.class, bookId).setOwnerId(personId);
     }
 }
