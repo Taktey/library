@@ -6,7 +6,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.maxima.dao.BookDAO;
 import ru.maxima.dao.PersonDAO;
-import ru.maxima.models.Book;
 import ru.maxima.models.Person;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package ru.maxima.dao;
 
+import org.hibernate.cfg.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Book;
@@ -9,6 +10,9 @@ import java.util.List;
 
 @Component
 public class BookDAO {
+    Configuration configuration = new Configuration()
+            .addAnnotatedClass(Person.class)
+            .addAnnotatedClass(Book.class);
     private JdbcTemplate jdbcTemplate;
 
     public BookDAO(JdbcTemplate jdbcTemplate) {

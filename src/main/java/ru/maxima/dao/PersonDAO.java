@@ -1,13 +1,26 @@
 package ru.maxima.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Person;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class PersonDAO {
+    Configuration configuration = new Configuration()
+            .addAnnotatedClass(Person.class);
+    SessionFactory sessionFactory = configuration.buildSessionFactory();
+    Session session = sessionFactory.getCurrentSession();
+    Transaction transaction;
+
+
+
     private JdbcTemplate jdbcTemplate;
 
     public PersonDAO(JdbcTemplate jdbcTemplate) {
@@ -15,13 +28,29 @@ public class PersonDAO {
     }
 
     public List<Person> getAllPeople() {
-        return jdbcTemplate
-                .query("Select * from person", new PersonMapper());
+        try {
+            session.beginTransaction();
+            return session.createQuery("from Person", Person.class).list();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+        return null;
     }
 
     public Person findPersonById(Long id) {
-        return jdbcTemplate
-                .queryForObject("select * from person where person_id=?", new Object[]{id}, new PersonMapper());
+        try {
+            session.beginTransaction();
+            return session.get(Person.class, id);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
+        return null;
     }
 
     public void savePerson(Person person) {
