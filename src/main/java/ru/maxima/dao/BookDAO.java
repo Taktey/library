@@ -55,7 +55,7 @@ public class BookDAO {
 
     @Transactional
     public List<Book> booksByOwnerId(Long ownerId) {
-        return getSession().createQuery("from Book where ownerId=ownerId").list();
+        return getSession().createQuery("from Book where ownerId=ownerId", Book.class).list();
     }
 
     @Transactional
