@@ -1,40 +1,52 @@
 package ru.maxima.dao;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import jakarta.transaction.Transactional;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.maxima.models.Person;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PersonDAO {
-    private JdbcTemplate jdbcTemplate;
+    SessionFactory sessionFactory;
 
-    public PersonDAO(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Autowired
+    public PersonDAO(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    private Session getSession() {
+        return Objects.requireNonNull(sessionFactory).getCurrentSession();
+    }
+
+    @Transactional
     public List<Person> getAllPeople() {
-        return jdbcTemplate
-                .query("Select * from person", new PersonMapper());
+        return getSession().createQuery("from Person", Person.class).list();
     }
 
+    @Transactional
     public Person findPersonById(Long id) {
-        return jdbcTemplate
-                .queryForObject("select * from person where person_id=?", new Object[]{id}, new PersonMapper());
+        return getSession().get(Person.class, id);
     }
 
+    @Transactional
     public void savePerson(Person person) {
-        jdbcTemplate.update("insert into person(person_name, person_birth_year) values(?,?)",
-                person.getPersonName(), person.getPersonBirthYear());
+        getSession().persist(person);
     }
 
-    public void updatePerson(Person person, Long id){
-        jdbcTemplate.update("update person set person_name=?,person_birth_year=? where person_id=?",
-                person.getPersonName(), person.getPersonBirthYear(), id);
+    @Transactional
+    public void updatePerson(Person person, Long id) {
+        Person personToUpdate = getSession().get(Person.class, id);
+        personToUpdate.setPersonName(person.getPersonName());
+        personToUpdate.setPersonBirthYear(person.getPersonBirthYear());
     }
 
-    public void deletePerson(Long id){
-        jdbcTemplate.update("delete from person where person_id=?",id);
+    @Transactional
+    public void deletePerson(Long id) {
+        getSession().remove(getSession().get(Person.class, id));
     }
 }
